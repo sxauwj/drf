@@ -89,7 +89,8 @@ class BookOptionsView(View):
 
 class BookView(View):
     def get(self,request):
-        # 序列化一个对象
+        """
+        # one 序列化一个对象
         book = BookInfo.objects.get(pk=2)
         # 1 创建序列化器对象，以模型类对象为参数
         serializer = BookSerializer(book)
@@ -97,4 +98,17 @@ class BookView(View):
         book_dict = serializer.data
         # 3 响应
         return JsonResponse(book_dict)
+        :param request:
+        :return:
+        """
+        # two 序列化列表
+        blist = BookInfo.objects.all()
+
+        # 1创建序列化对象，以列表为参数（查询集当列表来用），列表中是模型类对象
+        serializer = BookSerializer(blist,many=True)
+        # 2调用属性data，获取转换后的列表，列表中是字典
+        blist_dict = serializer.data
+
+        return  JsonResponse(blist_dict,safe=False)
+
 
