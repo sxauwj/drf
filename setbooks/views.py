@@ -6,7 +6,7 @@ from setbooks.models import BookInfo, HeroInfo
 
 #
 from rest_framework.viewsets import ModelViewSet
-from .serializers import BookInfoSerializer
+from .serializers import BookInfoSerializer,BookSerializer
 from .models import BookInfo
 
 class BookInfoViewSet(ModelViewSet):
@@ -87,5 +87,14 @@ class BookOptionsView(View):
             return JsonResponse({'errmsg':'该图书跑丢了'})
         return JsonResponse({}, status=204)
 
-
+class BookView(View):
+    def get(self,request):
+        # 序列化一个对象
+        book = BookInfo.objects.get(pk=2)
+        # 1 创建序列化器对象，以模型类对象为参数
+        serializer = BookSerializer(book)
+        # 2 调用属性data，获取转换后的字典
+        book_dict = serializer.data
+        # 3 响应
+        return JsonResponse(book_dict)
 
