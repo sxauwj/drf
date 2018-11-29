@@ -4,8 +4,15 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from setbooks.models import BookInfo, HeroInfo
 
+#
+from rest_framework.viewsets import ModelViewSet
+from .serializers import BookInfoSerializer
+from .models import BookInfo
 
-# Create your views here.
+class BookInfoViewSet(ModelViewSet):
+    queryset = BookInfo.objects.all()
+    serializer_class = BookInfoSerializer
+
 
 class BookInfoView(View):
     def get(self, request):
