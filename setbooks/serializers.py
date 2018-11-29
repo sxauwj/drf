@@ -25,3 +25,4 @@ class BookSerializer(serializers.Serializer):
     )
     # 该字段只允许反序列化输入
     bpub_date = serializers.DateField(write_only=True)
+    bread = serializers.IntegerField()
