@@ -36,3 +36,49 @@ class BookInfoView(View):
             'bpub_date': book_obj.bpub_date,
         }
         return JsonResponse(book_info, safe=False, status=201)
+
+
+class BookOptionsView(View):
+    def get(self, request, pk):
+        # 查 接受参数，查询图书
+        try:
+            book_obj = BookInfo.objects.get(pk=pk)
+        except Exception as e:
+            return JsonResponse({'errmsg': '该书走丢了'})
+        book_dict = {
+            'id': book_obj.id,
+            'name': book_obj.btitle,
+            'bpub_date': book_obj.bpub_date.strftime("%Y-%m-%d"),
+        }
+
+        return JsonResponse(book_dict)
+
+    def put(self, request, pk):
+        # 改 接受参数修改数据
+        update_dict = json.loads(request.body.decode())
+        # 获得修改对象
+        try:
+            book_obj = BookInfo.objects.get(pk=pk)
+        except:
+            return JsonResponse({'errmsg': '该书走丢了'})
+        # 更新数据
+        book_obj.bpub_date = update_dict['bpub_date']
+        book_obj.btitle = update_dict['btitle']
+        book_obj.save()
+        book_dict = {
+            'id': book_obj.id,
+            'bname': book_obj.btitle,
+            'bpub_date': book_obj.bpub_date,
+        }
+        return JsonResponse(book_dict, status=201)
+
+    def delete(self, request, pk):
+        # 删 获取参数
+        try:
+            book_obj = BookInfo.objects.get(pk=pk).delete()
+        except:
+            return JsonResponse({'errmsg':'该图书跑丢了'})
+        return JsonResponse({}, status=204)
+
+
+
