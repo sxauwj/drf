@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 urlpatterns = [
     # url(r'^queries/$',views.BookInfoView.as_view()),
     # url(r'^options/(?P<pk>\d+)/$',views.BookOptionsView.as_view()),
-    url('^books/$', views.BookView.as_view())
+    url('^books/$', views.BookView.as_view()),
+    url('^heros/$', views.HeroView.as_view())
 ]
 # 定义可以处理视图的路由器
 router = DefaultRouter()

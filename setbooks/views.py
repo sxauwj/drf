@@ -6,7 +6,7 @@ from setbooks.models import BookInfo, HeroInfo
 
 #
 from rest_framework.viewsets import ModelViewSet
-from .serializers import BookInfoSerializer,BookSerializer
+from .serializers import BookInfoSerializer,BookSerializer,HeroSerializer
 from .models import BookInfo
 
 class BookInfoViewSet(ModelViewSet):
@@ -105,10 +105,29 @@ class BookView(View):
         blist = BookInfo.objects.all()
 
         # 1创建序列化对象，以列表为参数（查询集当列表来用），列表中是模型类对象
+        # 需要指定many=True
         serializer = BookSerializer(blist,many=True)
         # 2调用属性data，获取转换后的列表，列表中是字典
         blist_dict = serializer.data
 
         return  JsonResponse(blist_dict,safe=False)
+
+class HeroView(View):
+    def get(self,request):
+        #多端关系属性输出
+        # # 获取对象
+        # hero = HeroInfo.objects.get(pk=1)
+        # # 生成序列化器对象
+        # serializer = HeroSerializer(hero)
+        # hero_dict = serializer.data
+        #
+        # return JsonResponse(hero_dict)
+
+        # 一端关系属性输出
+        book = BookInfo.objects.get(pk=1)
+        serializer = BookSerializer(book)
+        book_dict = serializer.data
+
+        return JsonResponse(book_dict)
 
 
