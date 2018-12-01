@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BookInfo
+from .models import BookInfo, HeroInfo
 
 """
 # 定义序列化器类
@@ -109,3 +109,18 @@ class BookSerializer(serializers.Serializer):
             instance.bcomment = validated_data.get('bcomment')
         instance.save()
         return instance
+
+
+# 使用模型类序列化器
+class HeroSerializer(serializers.ModelSerializer):
+    # 隐藏属性,输出需要明确定义
+    hbook_id = serializers.IntegerField()
+    hbook = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = HeroInfo
+        # fields = '__all__'
+        # fields = ['hname', 'hcomment','hbook_id','hbook']
+        exclude = ['is_delete']
+        # 嵌套表示
+        depth = 1

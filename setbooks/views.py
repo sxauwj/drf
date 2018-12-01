@@ -3,9 +3,13 @@ from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 from setbooks.models import BookInfo, HeroInfo
-
 from . import serializers
+# 基本视图类ＡＰＩＶＩＥＷ
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
+# from rest_framework.views import
 """
 class BookInfoViewSet(ModelViewSet):
     queryset = BookInfo.objects.all()
@@ -182,3 +186,30 @@ class BooksView(View):
             return JsonResponse(serializer.data)
         else:
             return JsonResponse(serializer.errors)
+
+
+# 未使用视图类
+# class HeroView(View):
+#     def get(self, request):
+#         hlist = HeroInfo.objects.filter(id__gt=16)
+#         serializer = serializers.HeroSerializer(hlist, many=True)
+#         return JsonResponse(serializer.data, safe=False)
+
+
+class HerosView(APIView):
+    def get(self,request):
+        # 接收查询字符串中的参数
+        pk = request.query_params.get('pk')
+        # 排序方式
+        ordering = request.query_params.get('ordering')
+        # 查询多个
+        hlist = HeroInfo.objects.filter(pk__gt=pk).order_by(ordering)
+        serializer = serializers.HeroSerializer(hlist,many=True)
+        return Response(serializer.data)
+    def post(self,request):
+        data = request.data
+        hero_obj = HeroInfo.objects.create(**data)
+        hero_obj.save()
+        serializer = serializers.HeroSerializer(hero_obj)
+        return Response(serializer.data)
+
