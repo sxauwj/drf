@@ -4,11 +4,10 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from setbooks.models import BookInfo, HeroInfo
 
-#
-from rest_framework.viewsets import ModelViewSet
-from .serializers import BookInfoSerializer,BookSerializer,HeroSerializer
-from .models import BookInfo
+from . import serializers
 
+
+"""
 class BookInfoViewSet(ModelViewSet):
     queryset = BookInfo.objects.all()
     serializer_class = BookInfoSerializer
@@ -68,6 +67,8 @@ class BookOptionsView(View):
             book_obj = BookInfo.objects.get(pk=pk)
         except:
             return JsonResponse({'errmsg': '该书走丢了'})
+        print('旧',book_obj.btitle)
+
         # 更新数据
         book_obj.bpub_date = update_dict['bpub_date']
         book_obj.btitle = update_dict['btitle']
@@ -77,6 +78,7 @@ class BookOptionsView(View):
             'bname': book_obj.btitle,
             'bpub_date': book_obj.bpub_date,
         }
+        print('新',book_obj.btitle)
         return JsonResponse(book_dict, status=201)
 
     def delete(self, request, pk):
@@ -90,7 +92,7 @@ class BookOptionsView(View):
 class BookView(View):
     def get(self,request):
         """
-        # one 序列化一个对象
+"""        # one 序列化一个对象
         book = BookInfo.objects.get(pk=2)
         # 1 创建序列化器对象，以模型类对象为参数
         serializer = BookSerializer(book)
@@ -99,8 +101,9 @@ class BookView(View):
         # 3 响应
         return JsonResponse(book_dict)
         :param request:
-        :return:
-        """
+        :return:"""
+
+"""
         # two 序列化列表
         blist = BookInfo.objects.all()
 
@@ -129,5 +132,32 @@ class HeroView(View):
         book_dict = serializer.data
 
         return JsonResponse(book_dict)
+
+"""
+class BookView(View):
+    # 序列化输出
+    def get(self, request):
+        blist = BookInfo.objects.all()
+        serializer = serializers.BookSerializer(blist, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    def post(self,request):
+        # 1接受客户端传来的数据
+        json_dict = json.loads(request.body.decode())
+
+        # 交给序列化器实现，进行反序列化
+        # 2验证创建对象
+        serializer  = serializers.BookSerializer(data = json_dict)
+        if serializer.is_valid():
+            # 验证通过
+            # serializer.validated_data 为验证过后返回的字典数据，其内容已经经过类型转换，
+            # 而json_dict的内容为字符串
+            # 通过验证后调用此方法，保存数据
+            # book为返回的对象
+            book = serializer.save()
+            # 进行序列化输出对象
+            serializer = serializers.BookSerializer(book)
+            return JsonResponse(serializer.data)
+        else:
+            return  JsonResponse(serializer.errors)
 
 
