@@ -16,4 +16,5 @@ urlpatterns += router.urls
 """
 urlpatterns = [
     url(r'^books/$',views.BookView.as_view()),
+    url(r'^books/(?P<pk>\d+)/$', views.BooksView.as_view()),
 ]

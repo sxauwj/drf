@@ -61,10 +61,12 @@ class BookSerializer(serializers.Serializer):
         min_value=5,
         max_value=20,
         error_messages={
-            'min_value': '最小值为10'
+            'min_value': '最小值为10',
+            'max_value': '最大值为20'
         }
     )
     bcomment = serializers.IntegerField(required=False)
+    heros = serializers.PrimaryKeyRelatedField(read_only=True, many=True)
 
     # 一 针对一个属性进行验证
     # validate_属性名 ， value 为btitle属性的值
@@ -86,3 +88,24 @@ class BookSerializer(serializers.Serializer):
         if bread < bcomment:
             raise serializers.ValidationError('阅读量不能小于评论量')
         return attrs
+
+    def create(self, validated_data):
+        # 创建对象
+        # 当调用序列化器对象的save()方法时执行
+        book = BookInfo.objects.create(**validated_data)
+        return book
+
+    def update(self, instance, validated_data):
+        # 修改对象
+        # instance 被修改的对象
+        # validated_data　接受的验证后的数据，是一个类型已经转换过字典，
+        # 对于必传属性，直接获取赋值
+        instance.btitle = validated_data.get('btitle')
+        instance.bpub_date = validated_data.get('bpub_date')
+        # 对于可传属性，判断再赋值
+        if validated_data.get('bread'):
+            instance.bread = validated_data.get('bread')
+        if validated_data.get('bcomment'):
+            instance.bcomment = validated_data.get('bcomment')
+        instance.save()
+        return instance

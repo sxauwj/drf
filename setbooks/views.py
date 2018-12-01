@@ -6,7 +6,6 @@ from setbooks.models import BookInfo, HeroInfo
 
 from . import serializers
 
-
 """
 class BookInfoViewSet(ModelViewSet):
     queryset = BookInfo.objects.all()
@@ -134,19 +133,22 @@ class HeroView(View):
         return JsonResponse(book_dict)
 
 """
+
+
 class BookView(View):
     # 序列化输出
     def get(self, request):
         blist = BookInfo.objects.all()
         serializer = serializers.BookSerializer(blist, many=True)
         return JsonResponse(serializer.data, safe=False)
-    def post(self,request):
+
+    def post(self, request):
         # 1接受客户端传来的数据
         json_dict = json.loads(request.body.decode())
 
         # 交给序列化器实现，进行反序列化
         # 2验证创建对象
-        serializer  = serializers.BookSerializer(data = json_dict)
+        serializer = serializers.BookSerializer(data=json_dict)
         if serializer.is_valid():
             # 验证通过
             # serializer.validated_data 为验证过后返回的字典数据，其内容已经经过类型转换，
@@ -158,6 +160,25 @@ class BookView(View):
             serializer = serializers.BookSerializer(book)
             return JsonResponse(serializer.data)
         else:
-            return  JsonResponse(serializer.errors)
+            return JsonResponse(serializer.errors)
 
 
+class BooksView(View):
+    def put(self, request, pk):
+        # 接受id
+        json_dict = json.loads(request.body.decode())
+        # 验证书籍是否存在
+        try:
+            book = BookInfo.objects.get(pk=pk)
+        except:
+            return JsonResponse({'errmsg': '该书走丢了'})
+        # 定义反序列化器对象
+        serializer = serializers.BookSerializer(book, data=json_dict)
+        if serializer.is_valid():
+            # 反序列化完成
+            book = serializer.save()
+            # 序列化
+            serializer = serializers.BookSerializer(book)
+            return JsonResponse(serializer.data)
+        else:
+            return JsonResponse(serializer.errors)
