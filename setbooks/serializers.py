@@ -123,4 +123,10 @@ class HeroSerializer(serializers.ModelSerializer):
         # fields = ['hname', 'hcomment','hbook_id','hbook']
         exclude = ['is_delete']
         # 嵌套表示
-        depth = 1
+        # depth = 1
+        # # 自定义验证方法 ,验证方法需要自己来写
+        # def validate_hname(self,value):
+        #     if not value.startswith('刘'):
+        #         return serializers.ValidationError("必须姓刘")
+        #     else:
+        #         return value

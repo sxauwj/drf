@@ -142,7 +142,7 @@ class HeroView(View):
 class BookView(View):
     # 序列化输出
     def get(self, request):
-        blist = BookInfo.objects.all()
+        blist = BookInfo.objects.filter(is_delete=False).all()
         serializer = serializers.BookSerializer(blist, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -197,19 +197,76 @@ class BooksView(View):
 
 
 class HerosView(APIView):
-    def get(self,request):
+    def get(self, request):
         # 接收查询字符串中的参数
         pk = request.query_params.get('pk')
         # 排序方式
         ordering = request.query_params.get('ordering')
         # 查询多个
-        hlist = HeroInfo.objects.filter(pk__gt=pk).order_by(ordering)
-        serializer = serializers.HeroSerializer(hlist,many=True)
-        return Response(serializer.data)
-    def post(self,request):
-        data = request.data
-        hero_obj = HeroInfo.objects.create(**data)
-        hero_obj.save()
-        serializer = serializers.HeroSerializer(hero_obj)
+        hlist = HeroInfo.objects.filter(pk__gt=pk, is_delete=False).order_by(ordering)
+        serializer = serializers.HeroSerializer(hlist, many=True)
         return Response(serializer.data)
 
+    def post(self, request):
+        data_dict = request.data
+        # 反序列化
+        serializer = serializers.HeroSerializer(data=data_dict)
+        # 验证失败抛异常 ,ＡＰＩ类中的dispatch会接受异常并处理
+        serializer.is_valid(raise_exception=True)
+
+        # 调用create方法
+        hero = serializer.save()
+        serializer = serializers.HeroSerializer(hero)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class HeroView(APIView):
+    def get(self, request, pk):
+        try:
+            # 根据主键查询一个
+            hero = HeroInfo.objects.get(pk=pk)
+        except:
+            return Response({'errmsg': '编号错误'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = serializers.HeroSerializer(hero)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        # 修改指定主键的对象
+        try:
+            hero = HeroInfo.objects.get(pk=pk)
+            print(hero)
+        except:
+            return Response({'errmsg': "编号错误"}, status=status.HTTP_404_NOT_FOUND)
+        data_dict = request.data
+        serializer = serializers.HeroSerializer(hero, data=data_dict)
+        print(serializer.is_valid())
+        serializer.is_valid(raise_exception=True)
+        hero = serializer.save()
+
+        serializer = serializers.HeroSerializer(hero)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        data_dict = request.data
+        try:
+            hero = HeroInfo.objects.get(pk=pk)
+        except:
+            return Response({'errmsg': '编号错误'}, status=status.HTTP_404_NOT_FOUND)
+        # 生成serializers对象时传入partial=True 时，可以让一些字段的必填约束失效
+        serializer = serializers.HeroSerializer(hero, data=data_dict, partial=True)
+        serializer.is_valid(raise_exception=True)
+        hero = serializer.save()
+        serializer = serializers.HeroSerializer(hero)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        try:
+            hero = HeroInfo.objects.get(pk=pk)
+            print(hero)
+        except:
+            return Response({'errmsg': '编号错误'})
+        # 物理删除
+        # hero.delete()
+        hero.is_delete = True
+        hero.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

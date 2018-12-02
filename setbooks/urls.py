@@ -15,8 +15,8 @@ router.register(r'queries', views.BookInfoViewSet)
 urlpatterns += router.urls
 """
 urlpatterns = [
-    url(r'^books/$',views.BookView.as_view()),
+    url(r'^books/$', views.BookView.as_view()),
     url(r'^books/(?P<pk>\d+)/$', views.BooksView.as_view()),
-    url(r'^heros/$',views.HerosView.as_view()),
-    # url(r'^heros/(?P<pk>\d+)$',views.HeroView.as_view()),
+    url(r'^heros/$', views.HerosView.as_view()),
+    url(r'^heros/(?P<pk>\d+)/$', views.HeroView.as_view()),
 ]
